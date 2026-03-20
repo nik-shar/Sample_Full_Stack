@@ -11,15 +11,23 @@ import {
 } from "recharts";
 
 
-function formatTickLabel(value) {
-  const date = new Date(value);
+const UTC_DATETIME_FORMATTER = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "UTC",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
 
-  return date.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+
+function formatTickLabel(value) {
+  return UTC_DATETIME_FORMATTER.format(new Date(value));
+}
+
+
+function formatTooltipLabel(value) {
+  return `${UTC_DATETIME_FORMATTER.format(new Date(value))} UTC`;
 }
 
 
@@ -48,7 +56,7 @@ function GenerationChart({ data }) {
           />
           <YAxis stroke="#4c6681" />
           <Tooltip
-            labelFormatter={(value) => new Date(value).toLocaleString()}
+            labelFormatter={formatTooltipLabel}
             formatter={(value, name) => [value ?? "No value", name]}
           />
           <Legend />
