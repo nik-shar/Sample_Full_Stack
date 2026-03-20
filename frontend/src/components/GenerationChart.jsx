@@ -49,10 +49,7 @@ function GenerationChart({ data }) {
           <YAxis stroke="#4c6681" />
           <Tooltip
             labelFormatter={(value) => new Date(value).toLocaleString()}
-            formatter={(value, name) => [
-              value ?? "No value",
-              name === "actualGeneration" ? "Actual" : "Forecast",
-            ]}
+            formatter={(value, name) => [value ?? "No value", name]}
           />
           <Legend />
           <Line
