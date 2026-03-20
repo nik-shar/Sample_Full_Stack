@@ -10,6 +10,7 @@ BASE_URL = "https://data.elexon.co.uk/bmrs/api/v1"
 ACTUALS_STREAM_URL = f"{BASE_URL}/datasets/FUELHH/stream"
 FORECAST_STREAM_URL = f"{BASE_URL}/datasets/WINDFOR/stream"
 REQUEST_TIMEOUT_SECONDS = 30
+MAX_FORECAST_HORIZON_HOURS = 48
 
 
 def _format_api_datetime(value: str | datetime) -> str:
@@ -70,6 +71,7 @@ def fetch_actual_wind_data(start_from: str | datetime, start_to: str | datetime)
             }
         )
 
+    actual_wind_rows.sort(key=lambda row: row["startTimeDt"])
     return actual_wind_rows
 
 
@@ -101,7 +103,7 @@ def fetch_forecast_wind_data(
         publish_time = _parse_api_datetime(publish_time_value)
         forecast_horizon_hours = (target_time - publish_time).total_seconds() / 3600
 
-        if forecast_horizon_hours < 0:
+        if forecast_horizon_hours < 0 or forecast_horizon_hours > MAX_FORECAST_HORIZON_HOURS:
             continue
 
         forecast_rows.append(
@@ -115,4 +117,12 @@ def fetch_forecast_wind_data(
             }
         )
 
-    return forecast_rows
+    deduped_forecasts: dict[tuple[datetime, datetime], dict[str, Any]] = {}
+    for forecast_row in forecast_rows:
+        key = (forecast_row["startTimeDt"], forecast_row["publishTimeDt"])
+        deduped_forecasts[key] = forecast_row
+
+    return sorted(
+        deduped_forecasts.values(),
+        key=lambda row: (row["startTimeDt"], row["publishTimeDt"]),
+    )

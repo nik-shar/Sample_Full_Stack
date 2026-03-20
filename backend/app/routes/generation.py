@@ -2,7 +2,11 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.services.bmrs import fetch_actual_wind_data, fetch_forecast_wind_data
+from app.services.bmrs import (
+    MAX_FORECAST_HORIZON_HOURS,
+    fetch_actual_wind_data,
+    fetch_forecast_wind_data,
+)
 from app.services.forecast_selector import select_latest_forecasts
 
 
@@ -22,7 +26,7 @@ def get_generation(
         )
 
     try:
-        forecast_publish_from_dt = start_time - timedelta(hours=forecast_horizon_hours+2)
+        forecast_publish_from_dt = start_time - timedelta(hours=MAX_FORECAST_HORIZON_HOURS)
         forecast_publish_to_dt = end_time
 
         actual_rows = fetch_actual_wind_data(start_time, end_time)
@@ -54,14 +58,14 @@ def get_generation(
     )
 
     return {
-        "meta": {
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "forecast_horizon_hours": forecast_horizon_hours,
-            "forecast_publish_from": forecast_publish_from_dt.isoformat(),
-            "forecast_publish_to": forecast_publish_to_dt.isoformat(),
-            "note": "All actual timestamps are returned. Forecast values are null when no valid forecast exists for that target time and horizon.",
-        },
+            "meta": {
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "forecast_horizon_hours": forecast_horizon_hours,
+                "forecast_publish_from": forecast_publish_from_dt.isoformat(),
+                "forecast_publish_to": forecast_publish_to_dt.isoformat(),
+                "note": "All actual timestamps are returned. Forecast selection is based on the latest forecast published on or before target_time minus horizon, using BMRS forecasts within the valid 0-48 hour horizon window.",
+            },
         "actual_count": len(actual_rows),
         "forecast_count": len(forecast_rows),
         "matched_count": len(matched_rows),
