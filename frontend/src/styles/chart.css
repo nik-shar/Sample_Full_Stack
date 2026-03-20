@@ -1,0 +1,19 @@
+.chart-shell {
+  width: 100%;
+  min-height: 380px;
+  margin-top: 18px;
+  padding: 14px 10px 6px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(247, 250, 252, 0.9), rgba(237, 244, 248, 0.85));
+  border: 1px solid rgba(16, 35, 59, 0.08);
+}
+
+.chart-empty-state {
+  margin-top: 18px;
+  padding: 32px 20px;
+  border-radius: 16px;
+  background: rgba(247, 250, 252, 0.8);
+  border: 1px dashed rgba(16, 35, 59, 0.18);
+  color: #48627f;
+  text-align: center;
+}
